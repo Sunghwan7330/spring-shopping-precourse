@@ -15,6 +15,15 @@ public class ProductManager {
         productMap = new HashMap<>();
     }
 
+    public Product getExistName(String name) {
+        for (Product product : productMap.values()) {
+            if (product.getName().equals(name)) {
+                return product;
+            }
+        }
+        return null;
+    }
+
     private boolean isExistName(String name) {
         for (Product product : productMap.values()) {
             if (product.getName().equals(name)) {
