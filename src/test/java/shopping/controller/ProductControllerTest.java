@@ -33,7 +33,8 @@ class ProductControllerTest {
     @DisplayName("상품 추가")
     void addProduct() {
         String url = "http://localhost:" + port + "/shop/addProduct";
-        String requestBody = "{ \"name\": \"productName\", \"price\": 3000, \"imageUrl\": \"http://test.com/test.jpg\" }";
+//        String requestBody = "{ \"name\": \"productName\", \"price\": 3000, \"imageUrl\": \"http://test.com/test.jpg\" }";
+        String requestBody = createRequest("productName", 3000, "http://test.com/test.jpg");
 
         ResponseEntity<Boolean> responseEntity =  restClient.post().uri(url)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -62,5 +63,15 @@ class ProductControllerTest {
         assertThat(responseEntity.getStatusCodeValue()).isEqualTo(200);
         assertThat(responseEntity.getBody()).isNotNull();
         assertThat(responseEntity.getBody().toString()).contains("false");
+    }
+
+    private String createRequest(String name, int price, String imageUrl){
+        return STR."""
+                {
+                    "name": "\{name}",
+                    "price": \{price},
+                    "imageUrl": "\{imageUrl}"
+                  }
+                """;
     }
 }
