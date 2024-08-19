@@ -15,7 +15,7 @@ class ProductTest {
     @DisplayName("상품 생성")
     void createProduct(){
         //given & when
-        Product product = new Product("쿠키", 1500, "http://test.com/cookie.jpg");
+        Product product = new Product(1L, "쿠키", 1500, "http://test.com/cookie.jpg");
 
         //then
         assertThat(product.getName()).isEqualTo("쿠키");
@@ -24,7 +24,7 @@ class ProductTest {
     @Test
     @DisplayName("상품 생성 실패 - 이미지 URL 형식 다름")
     void createProductUrlFail(){
-        assertThatThrownBy(()-> new Product("쿠키", 1500, "http://test.com"))
+        assertThatThrownBy(()-> new Product(1L, "쿠키", 1500, "http://test.com"))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
@@ -33,7 +33,7 @@ class ProductTest {
     @ValueSource(strings = {"http://test.com/cookie.jpg", "http://test.com/cookie.jpeg", "http://test.com/cookie.png", "http://test.com/cookie.gif"
     ,"https://test.com/cookie.jpg", "https://test.com/cookie.jpeg", "https://test.com/cookie.png", "https://test.com/cookie.gif"})
     void createProductUrl(String imageUrl){
-        Product product = new Product("쿠키", 1500, imageUrl);
+        Product product = new Product(1L, "쿠키", 1500, imageUrl);
 
         assertThat(product.getImage().getValue()).isEqualTo(imageUrl);
     }
