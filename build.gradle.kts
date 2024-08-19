@@ -8,6 +8,7 @@ plugins {
 
 group = "camp.nextstep.edu"
 version = "0.0.1-SNAPSHOT"
+val lombokVersion = "1.18.34"
 
 java {
     toolchain {
@@ -28,6 +29,8 @@ dependencies {
     implementation("org.flywaydb:flyway-core")
     implementation("org.flywaydb:flyway-mysql")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
+    compileOnly("org.projectlombok:lombok:$lombokVersion")
+    annotationProcessor("org.projectlombok:lombok:$lombokVersion")
     runtimeOnly("com.h2database:h2")
     runtimeOnly("com.mysql:mysql-connector-j")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
