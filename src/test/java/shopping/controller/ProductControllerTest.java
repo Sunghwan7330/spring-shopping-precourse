@@ -15,6 +15,7 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.util.UriComponentsBuilder;
+import shopping.common.ApiResponse;
 import shopping.dto.ProductDto;
 
 import java.net.URI;
@@ -47,11 +48,12 @@ class ProductControllerTest {
     void addProduct() {
         String requestBody = createRequest("productName", 3000, "http://test.com/test.jpg");
 
-        ResponseEntity<Boolean> responseEntity = restClientAddProduct(requestBody);
+        ResponseEntity<ApiResponse> responseEntity = restClientAddProduct(requestBody);
 
+        ProductDto response = objectMapper.convertValue(responseEntity.getBody().getData(), ProductDto.class);
         assertThat(responseEntity.getStatusCodeValue()).isEqualTo(200);
         assertThat(responseEntity.getBody()).isNotNull();
-        assertThat(responseEntity.getBody().toString()).contains("true");
+        assertThat(response.getName()).isEqualTo("productName");
     }
 
     @Test
@@ -60,7 +62,7 @@ class ProductControllerTest {
         String requestBody = createRequest("productName", 3000, "http://test.com/test.jpg");
 
         restClientAddProduct(requestBody);
-        ResponseEntity<Boolean> responseEntity = restClientAddProduct(requestBody);
+        ResponseEntity<ApiResponse> responseEntity = restClientAddProduct(requestBody);
 
         assertThat(responseEntity.getStatusCodeValue()).isEqualTo(200);
         assertThat(responseEntity.getBody()).isNotNull();
@@ -136,13 +138,54 @@ class ProductControllerTest {
         assertThat(responseEntity.getBody().toString()).contains("false");
     }
 
-    private ResponseEntity<Boolean> restClientAddProduct(String requestBody) {
+    @Test
+    @DisplayName("15자 넘는 상품명 추가")
+    void _15자넘는_상품명_추가() {
+        String requestBody = "{ \"name\": \"동해물과 백두산이 마르고 닳도록\", \"price\": 1500, \"imageUrl\": \"http://test.com/test.jpg\" }";
+
+        String responseStr = "";
+        try {
+            ResponseEntity<ApiResponse> responseEntity = restClientAddProduct(requestBody);
+        } catch (HttpClientErrorException.BadRequest e) {
+            responseStr = e.getMessage();
+        }
+        assertThat(responseStr).isEqualTo("400 : \"{\"result\":false,\"data\":null,\"message\":\"상품의 이름은 15자를 넘길 수 없습니다.\"}\"");
+    }
+
+    @Test
+    @DisplayName("15자 넘는 상품명 수정")
+    void _15자넘는_상품명_수정() {
+//            ```gherkin
+//        Given 기존 상품이 존재할 때
+//        And 변경하는 상품의 이름이 "동해물과 백두산이 마르고 닳도록"
+//        When 상품을 수정하면
+//        Then 400 Bad Request를 반환한다.
+//                And "상품의 이름은 15자를 넘길 수 없습니다."라고 응답한다.
+//            ```
+        String request = "{ \"productId\": 1, \"name\": \"동해물과 백두산이 마르고 닳도록\" }";
+        restClientAddProduct(createRequest("productName", 3000, "http://test.com/test.jpg"));
+
+        String responseStr = "";
+        try {
+            ResponseEntity<ProductDto> response = restClient.put()
+                    .uri(url)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(request)
+                    .retrieve()
+                    .toEntity(ProductDto.class);
+        } catch (HttpClientErrorException.BadRequest e) {
+            responseStr = e.getMessage();
+        }
+        assertThat(responseStr).isEqualTo("400 : \"{\"result\":false,\"data\":null,\"message\":\"상품의 이름은 15자를 넘길 수 없습니다.\"}\"");
+    }
+
+    private ResponseEntity<ApiResponse> restClientAddProduct(String requestBody) {
         return restClient.post()
                 .uri(url)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(requestBody)
                 .retrieve()
-                .toEntity(Boolean.class);
+                .toEntity(ApiResponse.class);
     }
   
     private String createRequest(String name, int price, String imageUrl){

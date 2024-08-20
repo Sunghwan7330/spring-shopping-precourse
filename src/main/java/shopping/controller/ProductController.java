@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import shopping.ProductManager;
+import shopping.common.ApiResponse;
 import shopping.dto.AddProductRequestDto;
 import shopping.dto.ModifyProductRequestDto;
 import shopping.dto.ProductDto;
@@ -21,13 +22,13 @@ public class ProductController {
     }
 
     @PostMapping("/api/products")
-    public ResponseEntity<Boolean> addProduct(@RequestBody AddProductRequestDto request) {
-        boolean res = productManager.addProduct(request.toProductDto());
+    public ResponseEntity<ApiResponse<ProductDto>> addProduct(@RequestBody AddProductRequestDto request) {
+        ApiResponse res = productManager.addProduct(request.toProductDto());
         return ResponseEntity.status(200).body(res);
     }
 
     @PutMapping("/api/products")
-    public ResponseEntity<ProductDto> modifyProduct(@RequestBody ModifyProductRequestDto request) {
+    public ResponseEntity<ApiResponse<ProductDto>> modifyProduct(@RequestBody ModifyProductRequestDto request) {
         return ResponseEntity.ok(productManager.modifyProduct(request));
     }
 

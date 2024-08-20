@@ -1,6 +1,7 @@
 package shopping;
 
 import org.springframework.stereotype.Service;
+import shopping.common.ApiResponse;
 import shopping.dto.ModifyProductRequestDto;
 import shopping.dto.ProductDto;
 import shopping.entity.Product;
@@ -18,32 +19,28 @@ public class ProductManager {
         this.productRepository = productRepository;
     }
 
-    public boolean addProduct(ProductDto productDto) {
+    public ApiResponse addProduct(ProductDto productDto) {
         if(productRepository.findByName(productDto.getName()).isPresent()) {
-            return false;
+            throw new RuntimeException("동일한 상품명이 이미 존재합니다.");
         }
 
         Product product;
-        try {
-            product = new Product(
-                    nextId.incrementAndGet(),
-                    productDto.getName(),
-                    productDto.getPrice(),
-                    productDto.getImageUrl()
-            );
-        } catch (IllegalArgumentException e) {
-            return false;
-        }
+        product = new Product(
+                nextId.incrementAndGet(),
+                productDto.getName(),
+                productDto.getPrice(),
+                productDto.getImageUrl()
+        );
 
         productRepository.save(product);
-        return true;
+        return ApiResponse.ofSuccess(ProductDto.of(product));
     }
 
-    public ProductDto modifyProduct(ModifyProductRequestDto request) {
+    public ApiResponse modifyProduct(ModifyProductRequestDto request) {
         Product product = productRepository.findById(request.productId()).orElseThrow(()->new RuntimeException("상품을 찾지 못했습니다."));
         product.update(request);
 
-        return ProductDto.of(product);
+        return ApiResponse.ofSuccess(ProductDto.of(product));
     }
 
     public ProductDto getData(Long productId) {
