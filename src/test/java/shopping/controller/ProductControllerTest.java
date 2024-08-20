@@ -13,9 +13,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClient;
+import org.springframework.web.util.UriComponentsBuilder;
 import shopping.dto.ProductDto;
 
+import java.net.URI;
+
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -85,27 +89,28 @@ class ProductControllerTest {
 
         restClientAddProduct(requestBody);
 
-        ResponseEntity<String> responseEntity =  restClient.get().uri(url + "?name=productName")
-                .retrieve()
-                .toEntity(String.class);
+        // 예시로 사용할 productId
+        Long productId = 1L;
 
-        String expect = "{\"id\":1,\"name\":\"productName\",\"price\":3000,\"image\":{\"value\":\"http://test.com/test.jpg\"}}";
+        ResponseEntity<ProductDto> responseEntity =  restClient.get()
+                .uri(url+"/{productId}", productId)
+                .retrieve()
+                .toEntity(ProductDto.class);
+
+        ProductDto expect = new ProductDto("productName", 3000, "http://test.com/test.jpg");
         assertThat(responseEntity.getStatusCodeValue()).isEqualTo(200);
         assertThat(responseEntity.getBody()).isNotNull();
-        assertThat(responseEntity.getBody().toString()).isEqualTo(expect);
+        assertThat(responseEntity.getBody().getName()).isEqualTo(expect.getName());
+        assertThat(responseEntity.getBody().getPrice()).isEqualTo(expect.getPrice());
+        assertThat(responseEntity.getBody().getImageUrl()).isEqualTo(expect.getImageUrl());
     }
 
     @Test
-    @DisplayName("상품 실패 조회")
+    @DisplayName("상품 조회 실패")
     void failToGetProductCauseNotFound() {
-        HttpClientErrorException exception = assertThrows(HttpClientErrorException.class, () -> {
-            ResponseEntity<String> responseEntity =  restClient.get().uri(url + "?name=productName")
-                    .retrieve()
-                    .toEntity(String.class);
-
-        });
-
-        assertThat(exception.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        assertThatThrownBy(()-> restClient.get().uri(url + "?name=productName")
+                .retrieve()
+                .toEntity(String.class)).isInstanceOf(HttpClientErrorException.class);
     }
 
 

@@ -31,15 +31,9 @@ public class ProductController {
         return ResponseEntity.ok(productManager.modifyProduct(request));
     }
 
-    @GetMapping("/api/products")
-    public ResponseEntity<Product> getData(@RequestParam(name = "name", defaultValue = "") String name) {
-        Product product = productManager.getExistName(name);
-
-        if (product == null) {
-            return ResponseEntity.status(404).body(null);
-        }
-
-        return ResponseEntity.status(200).body(product);
+    @GetMapping("/api/products/{productId}")
+    public ResponseEntity<ProductDto> getData(@PathVariable("productId") Long productId) {
+        return ResponseEntity.status(200).body(productManager.getData(productId));
     }
 
     @DeleteMapping("/api/products")

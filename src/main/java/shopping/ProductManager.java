@@ -50,6 +50,14 @@ public class ProductManager {
         return ProductDto.of(product);
     }
 
+    public ProductDto getData(Long productId) {
+        if(!isExistId(productId)){
+            throw new IllegalArgumentException("존재하지 않는 상품입니다.");
+        }
+
+        return ProductDto.of(productMap.get(productId));
+    }
+
     private boolean isExistName(String name) {
         return productMap.values().stream().anyMatch(product -> product.getName().equals(name));
     }
