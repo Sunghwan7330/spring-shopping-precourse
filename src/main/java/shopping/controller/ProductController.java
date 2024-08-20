@@ -20,13 +20,13 @@ public class ProductController {
         this.productManager = productManager;
     }
 
-    @PostMapping("/shop/addProduct")
+    @PostMapping("/api/products")
     public ResponseEntity<Boolean> addProduct(@RequestBody AddProductRequestDto request) {
         boolean res = productManager.addProduct(request.toProductDto());
         return ResponseEntity.status(200).body(res);
     }
 
-    @PutMapping("/shop/modifyProduct")
+    @PutMapping("/api/products")
     public ResponseEntity<ProductDto> modifyProduct(@RequestBody ModifyProductRequestDto request) {
         return ResponseEntity.ok(productManager.modifyProduct(request));
     }

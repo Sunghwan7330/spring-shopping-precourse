@@ -10,6 +10,7 @@ import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClient;
 import shopping.dto.ProductDto;
@@ -32,14 +33,13 @@ class ProductControllerTest {
 
     @BeforeEach
     void setUp() {
-        url = "http://localhost:" + port;
+        url = "http://localhost:" + port+"/api/products";
         restClient = clientBuilder.build();
     }
 
     @Test
     @DisplayName("상품 추가")
     void addProduct() {
-//        String requestBody = "{ \"name\": \"productName\", \"price\": 3000, \"imageUrl\": \"http://test.com/test.jpg\" }";
         String requestBody = createRequest("productName", 3000, "http://test.com/test.jpg");
 
         ResponseEntity<Boolean> responseEntity = restClientAddProduct(requestBody);
@@ -69,7 +69,7 @@ class ProductControllerTest {
         restClientAddProduct(createRequest("productName", 3000, "http://test.com/test.jpg"));
 
         ResponseEntity<ProductDto> response = restClient.put()
-                .uri(url+"/shop/modifyProduct")
+                .uri(url)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(request)
                 .retrieve()
@@ -81,16 +81,10 @@ class ProductControllerTest {
     @Test
     @DisplayName("상품 조회")
     void getProduct() {
-        String url = "http://localhost:" + port + "/shop/addProduct";
         String requestBody = "{ \"name\": \"productName\", \"price\": 3000, \"imageUrl\": \"http://test.com/test.jpg\" }";
 
-        restClient.post().uri(url)
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(requestBody)
-                .retrieve()
-                .toEntity(Boolean.class);
+        restClientAddProduct(requestBody);
 
-        url = "http://localhost:" + port + "/api/products";
         ResponseEntity<String> responseEntity =  restClient.get().uri(url + "?name=productName")
                 .retrieve()
                 .toEntity(String.class);
@@ -104,8 +98,6 @@ class ProductControllerTest {
     @Test
     @DisplayName("상품 실패 조회")
     void failToGetProductCauseNotFound() {
-        String url = "http://localhost:" + port + "/api/products";
-
         HttpClientErrorException exception = assertThrows(HttpClientErrorException.class, () -> {
             ResponseEntity<String> responseEntity =  restClient.get().uri(url + "?name=productName")
                     .retrieve()
@@ -120,16 +112,10 @@ class ProductControllerTest {
     @Test
     @DisplayName("상품 제거")
     void deleteProduct() {
-        String url = "http://localhost:" + port + "/shop/addProduct";   // TODO 변경 필요
         String requestBody = "{ \"name\": \"productName\", \"price\": 3000, \"imageUrl\": \"http://test.com/test.jpg\" }";
 
-        restClient.post().uri(url)
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(requestBody)
-                .retrieve()
-                .toEntity(Boolean.class);
+        restClientAddProduct(requestBody);
 
-        url = "http://localhost:" + port + "/api/products";
         ResponseEntity<Boolean> responseEntity =  restClient.delete().uri(url + "?name=productName")
                 .retrieve()
                 .toEntity(Boolean.class);
@@ -142,7 +128,6 @@ class ProductControllerTest {
     @Test
     @DisplayName("상품 제거 실패")
     void failToDeleteProductCauseNotFound() {
-        String url = "http://localhost:" + port + "/api/products";
         HttpClientErrorException exception = assertThrows(HttpClientErrorException.class, () -> {
             ResponseEntity<Boolean> responseEntity =  restClient.delete().uri(url + "?name=productName")
                     .retrieve()
@@ -154,7 +139,7 @@ class ProductControllerTest {
 
     private ResponseEntity<Boolean> restClientAddProduct(String requestBody) {
         return restClient.post()
-                .uri(url + "/shop/addProduct")
+                .uri(url)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(requestBody)
                 .retrieve()
