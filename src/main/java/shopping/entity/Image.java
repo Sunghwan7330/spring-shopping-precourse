@@ -1,6 +1,7 @@
 package shopping.entity;
 
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 
 import java.util.regex.Pattern;
@@ -10,10 +11,10 @@ public class Image {
     private static final Pattern IMAGE_URL_PATTERN = Pattern.compile( "^(https?:\\/\\/)?([\\w\\-]+\\.)+[\\w\\-]" +
             "+(\\/[\\w\\-\\.]+)*\\.(jpg|jpeg|png|gif)$", Pattern.CASE_INSENSITIVE);
 
+    @Column(name = "image_url")
     private String value;
 
     public Image() {
-        throw new IllegalArgumentException("사용할 수 없는 생성자입니다.");
     }
 
     public Image(String imageUrl) {

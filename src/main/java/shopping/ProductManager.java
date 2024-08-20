@@ -4,23 +4,22 @@ import org.springframework.stereotype.Service;
 import shopping.dto.ModifyProductRequestDto;
 import shopping.dto.ProductDto;
 import shopping.entity.Product;
+import shopping.repository.ProductRepository;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 
 @Service
 public class ProductManager {
-    private Map<Long, Product> productMap;
+    private final ProductRepository productRepository;
     private AtomicLong nextId;
 
-    public ProductManager() {
-        productMap = new HashMap<>();
+    public ProductManager(ProductRepository productRepository) {
         nextId = new AtomicLong();
+        this.productRepository = productRepository;
     }
 
     public boolean addProduct(ProductDto productDto) {
-        if (isExistName(productDto.getName())) {
+        if(productRepository.findByName(productDto.getName()).isPresent()) {
             return false;
         }
 
@@ -35,43 +34,25 @@ public class ProductManager {
         } catch (IllegalArgumentException e) {
             return false;
         }
-        productMap.put(product.getId(), product);
+
+        productRepository.save(product);
         return true;
     }
 
     public ProductDto modifyProduct(ModifyProductRequestDto request) {
-        if(!isExistId(request.productId())){
-            throw new IllegalArgumentException("존재하지 않는 상품입니다.");
-        }
-
-        Product product = productMap.get(request.productId());
+        Product product = productRepository.findById(request.productId()).orElseThrow(()->new RuntimeException("상품을 찾지 못했습니다."));
         product.update(request);
 
         return ProductDto.of(product);
     }
 
     public ProductDto getData(Long productId) {
-        if(!isExistId(productId)){
-            throw new IllegalArgumentException("존재하지 않는 상품입니다.");
-        }
-
-        return ProductDto.of(productMap.get(productId));
+        Product product = productRepository.findById(productId).orElseThrow(()-> new RuntimeException("상품이 존재하지 않습니다."));
+        return ProductDto.of(product);
     }
 
-    private boolean isExistName(String name) {
-        return productMap.values().stream().anyMatch(product -> product.getName().equals(name));
-    }
-
-    public Product getExistName(String name) {
-        for (Product product : productMap.values()) {
-            if (product.getName().equals(name)) {
-                return product;
-            }
-        }
-        return null;
-    }
-
-    private boolean isExistId(Long id){
-        return productMap.values().stream().anyMatch(product -> product.getId().equals(id));
+    public void deleteData(Long productId) {
+        Product product = productRepository.findById(productId).orElseThrow(()-> new RuntimeException("상품이 존재하지 않습니다."));
+        productRepository.delete(product);
     }
 }

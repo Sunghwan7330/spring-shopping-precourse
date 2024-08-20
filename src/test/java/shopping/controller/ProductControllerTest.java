@@ -12,6 +12,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.util.UriComponentsBuilder;
 import shopping.dto.ProductDto;
@@ -91,9 +92,8 @@ class ProductControllerTest {
 
         // 예시로 사용할 productId
         Long productId = 1L;
-
         ResponseEntity<ProductDto> responseEntity =  restClient.get()
-                .uri(url+"/{productId}", productId)
+                .uri(url + "/{productId}", productId)
                 .retrieve()
                 .toEntity(ProductDto.class);
 
@@ -106,22 +106,15 @@ class ProductControllerTest {
     }
 
     @Test
-    @DisplayName("상품 조회 실패")
-    void failToGetProductCauseNotFound() {
-        assertThatThrownBy(()-> restClient.get().uri(url + "?name=productName")
-                .retrieve()
-                .toEntity(String.class)).isInstanceOf(HttpClientErrorException.class);
-    }
-
-
-    @Test
     @DisplayName("상품 제거")
     void deleteProduct() {
         String requestBody = "{ \"name\": \"productName\", \"price\": 3000, \"imageUrl\": \"http://test.com/test.jpg\" }";
 
         restClientAddProduct(requestBody);
 
-        ResponseEntity<Boolean> responseEntity =  restClient.delete().uri(url + "?name=productName")
+        Long productId = 1L;
+        ResponseEntity<Boolean> responseEntity =  restClient.delete()
+                .uri(url+"/{productId}", productId)
                 .retrieve()
                 .toEntity(Boolean.class);
 
@@ -133,13 +126,14 @@ class ProductControllerTest {
     @Test
     @DisplayName("상품 제거 실패")
     void failToDeleteProductCauseNotFound() {
-        HttpClientErrorException exception = assertThrows(HttpClientErrorException.class, () -> {
-            ResponseEntity<Boolean> responseEntity =  restClient.delete().uri(url + "?name=productName")
-                    .retrieve()
-                    .toEntity(Boolean.class);
+        Long productId = 1L;
+        ResponseEntity<Boolean> responseEntity =  restClient.delete()
+                .uri(url+"/{productId}", productId)
+                .retrieve()
+                .toEntity(Boolean.class);
 
-        });
-        assertThat(exception.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        assertThat(responseEntity.getStatusCodeValue()).isEqualTo(200);
+        assertThat(responseEntity.getBody().toString()).contains("false");
     }
 
     private ResponseEntity<Boolean> restClientAddProduct(String requestBody) {

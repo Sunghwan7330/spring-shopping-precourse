@@ -6,5 +6,4 @@ public record ModifyProductRequestDto(
         int price,
         String imageUrl
 ){
-
 }

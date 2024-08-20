@@ -1,13 +1,13 @@
 package shopping.entity;
 
-import jakarta.persistence.Embedded;
+import jakarta.persistence.*;
 import shopping.dto.ModifyProductRequestDto;
 
 import static org.springframework.util.StringUtils.hasText;
 
+@Entity
 public class Product {
-//    @Id
-//    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
     private Long id;
     private String name;
     private int price;
@@ -18,6 +18,12 @@ public class Product {
 
     public Product(long id, String name, int price, String imageUrl) {
         this.id = id;
+        this.name = name;
+        this.price = price;
+        this.image = new Image(imageUrl);
+    }
+
+    public Product(String name, int price, String imageUrl) {
         this.name = name;
         this.price = price;
         this.image = new Image(imageUrl);

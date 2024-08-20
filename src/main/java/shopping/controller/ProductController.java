@@ -36,14 +36,13 @@ public class ProductController {
         return ResponseEntity.status(200).body(productManager.getData(productId));
     }
 
-    @DeleteMapping("/api/products")
-    public ResponseEntity<Boolean> deleteData(@RequestParam(name = "name", defaultValue = "") String name) {
-        Product product = productManager.getExistName(name);
-
-        if (product == null) {
-            return ResponseEntity.status(404).body(null);
+    @DeleteMapping("/api/products/{productId}")
+    public ResponseEntity<Boolean> deleteData(@PathVariable("productId") Long productId) {
+        try {
+            productManager.deleteData(productId);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(200).body(false);
         }
-
         return ResponseEntity.status(200).body(true);
     }
 }
