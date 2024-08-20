@@ -54,6 +54,15 @@ public class ProductManager {
         return productMap.values().stream().anyMatch(product -> product.getName().equals(name));
     }
 
+    public Product getExistName(String name) {
+        for (Product product : productMap.values()) {
+            if (product.getName().equals(name)) {
+                return product;
+            }
+        }
+        return null;
+    }
+
     private boolean isExistId(Long id){
         return productMap.values().stream().anyMatch(product -> product.getId().equals(id));
     }

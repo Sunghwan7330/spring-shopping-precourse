@@ -1,8 +1,6 @@
 package shopping.controller;
 
-import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -11,6 +9,8 @@ import shopping.ProductManager;
 import shopping.dto.AddProductRequestDto;
 import shopping.dto.ModifyProductRequestDto;
 import shopping.dto.ProductDto;
+import org.springframework.web.bind.annotation.*;
+import shopping.entity.Product;
 
 @RestController
 public class ProductController {
@@ -29,5 +29,27 @@ public class ProductController {
     @PutMapping("/shop/modifyProduct")
     public ResponseEntity<ProductDto> modifyProduct(@RequestBody ModifyProductRequestDto request) {
         return ResponseEntity.ok(productManager.modifyProduct(request));
+    }
+
+    @GetMapping("/api/products")
+    public ResponseEntity<Product> getData(@RequestParam(name = "name", defaultValue = "") String name) {
+        Product product = productManager.getExistName(name);
+
+        if (product == null) {
+            return ResponseEntity.status(404).body(null);
+        }
+
+        return ResponseEntity.status(200).body(product);
+    }
+
+    @DeleteMapping("/api/products")
+    public ResponseEntity<Boolean> deleteData(@RequestParam(name = "name", defaultValue = "") String name) {
+        Product product = productManager.getExistName(name);
+
+        if (product == null) {
+            return ResponseEntity.status(404).body(null);
+        }
+
+        return ResponseEntity.status(200).body(true);
     }
 }
